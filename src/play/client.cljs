@@ -12,7 +12,7 @@
 
 ;;* Utils
 (defn- dom-el [^String id]
-  (.getElementById js/document "main"))
+  (.getElementById js/document id))
 
 (defn format-time [ts]
   (-> ts (js/Date.) (.toISOString) (subs 11 23)))
