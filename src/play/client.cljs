@@ -27,29 +27,40 @@
   [:div label ": "
    [:span {:style {:color @*color}} (format-time time)]])
 
-(defn- mount-timer-static [mount-el]
-  (rum/mount (timer-static "Static" @*clock) mount-el)
+(defn- mount-timer-static [el]
+  (rum/mount (timer-static "Static" @*clock) el)
   ;; Setting up watch manually,
   ;; force top-down re-render via mount
   (add-watch *clock :timer-static
              (fn [_ _ _ new-val]
-               (rum/mount (timer-static "Static" new-val) mount-el))))
+               (rum/mount (timer-static "Static" new-val) el))))
+
+;;** timer-reactive
+(rum/defc timer-reactive < rum/reactive []
+  [:div "Reactive: "
+   [:span {:style {:color (rum/react *color)}}
+    (format-time (rum/react *clock))]])
+
+(defn- mount-timer-reactive [el]
+  (rum/mount (timer-reactive) el))
 
 ;;** window
-(rum/defc window < rum/static []
-  [:.example
-   [:.example-title "Timers"]
-   [:#timer-static (timer-static "Static" @*clock)]])
+(rum/defc window []
+  [:div.example
+   [:div.example-title "Timers"]
+   [:div#timer-static]
+   [:div#timer-reactive]])
 
-(defn mount []
-  (rum/mount (window) (dom-el "main")))
+(defn mount [el]
+  (rum/mount (window) el))
 
 ;;* Execute
 ;;** Mount main window
-(mount)
+(mount (dom-el "main"))
 
 ;;** Mount components
 (mount-timer-static (dom-el "timer-static"))
+(mount-timer-reactive (dom-el "timer-reactive"))
 
 ;;** Start clock
 (tick)
