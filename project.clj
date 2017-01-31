@@ -5,6 +5,7 @@
             :url "https://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.293"]
+                 [rum "0.10.8"]
                  [hiccup "1.0.5"]]
   :profiles {:dev {:plugins [[lein-cljsbuild "1.1.5"]
                              [lein-figwheel "0.5.9"]]
