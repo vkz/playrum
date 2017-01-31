@@ -2,4 +2,4 @@
 
 (enable-console-print!)
 
-(println "Hello world!")
+(print "Go out and play!")
