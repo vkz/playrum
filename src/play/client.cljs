@@ -117,6 +117,59 @@
 (defn- mount-binary-clock [el]
   (rum/mount (binary-clock) el))
 
+;;** artboard
+
+(def ^:const board-width 19)
+(def ^:const board-height 10)
+
+(defn- prime? [i]
+  (and (>= i 2)
+       (empty? (filter #(= 0 (mod i %)) (range 2 i)))))
+
+(defn- initial-board []
+  (->> (map prime? (range 0 (* board-width board-height)))
+       (partition board-width)
+       (mapv vec)))
+
+(def *board (atom (initial-board)))
+(def *board-renders (atom 0))
+
+(rum/defc board-stats < rum/reactive [*board *renders]
+  [:div.stats
+   "Renders: " (rum/react *renders)
+   [:br]
+   "Board watches: " (watches-count *board)
+   [:br]
+   "Color watches: " (watches-count *color)])
+
+(rum/defc cell < rum/reactive [x y]
+  (swap! *board-renders inc)
+  (let [*cursor (rum/cursor-in *board [y x])]
+    ;; each cell subscribes to its own cursor inside a board
+    ;; note that subscription to color is conditional:
+    ;; only if cell is on (@cursor == true),
+    ;; this component will be notified on color changes
+    [:td.art-cell {:style {:background-color (when (rum/react *cursor) (rum/react *color))}
+                   :on-mouse-over (fn [_] (swap! *cursor not) nil)}]))
+
+(rum/defc board-reactive []
+  ;; faking board with a table till we add CSS for .artboard .art-cell .stats
+  [:div
+   [:table
+    [:tbody.artboard
+     (for [y (range 0 board-height)]
+       [:tr.art-row {:key y}
+        (for [x (range 0 board-width)]
+          ;; this is how one can specify React key for component. React requires
+          ;; creating "stable identities" for children in arrays and iterators -
+          ;; no idea why.
+          (-> (cell x y)
+              (rum/with-key [x y])))])]]
+   (board-stats *board *board-renders)])
+
+(defn- mount-artboard [el]
+  (rum/mount (board-reactive) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -129,7 +182,10 @@
     [:#controls]]
    [:.example
     [:.example-title "Binary clock"]
-    [:#binary-clock]]])
+    [:#binary-clock]]
+   [:.example
+    [:.example-title]
+    [:#artboard]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -143,6 +199,7 @@
 (mount-timer-reactive (dom-el "timer-reactive"))
 (mount-controls (dom-el "controls"))
 (mount-binary-clock (dom-el "binary-clock"))
+(mount-artboard (dom-el "artboard"))
 
 ;;** Start clock
 (tick)
