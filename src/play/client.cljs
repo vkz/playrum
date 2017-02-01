@@ -170,6 +170,53 @@
 (defn- mount-artboard [el]
   (rum/mount (board-reactive) el))
 
+;;** bmi-calculator
+
+(def *bmi-data (atom {:height 180
+                      :weight 80}))
+
+(defn calc-bmi [{:keys [height weight bmi] :as data}]
+  (let [h (/ height 100)]
+    (if (nil? bmi)
+      (assoc data :bmi (/ weight (* h h)))
+      (assoc data :weight (* bmi h h)))))
+
+(defn slider [param value min max]
+  (let [reset (case param
+                :bmi :weight
+                :bmi)]
+    [:input {:type "range"
+             :value (int value)
+             :min min
+             :max max
+             :style {:width "100%"}
+             :on-change #(swap! *bmi-data assoc
+                                param (-> % .-target .-value)
+                                reset nil)}]))
+
+(rum/defc bmi-calculator < rum/reactive []
+  (let [{:keys [weight height bmi] :as data} (calc-bmi (rum/react *bmi-data))
+        [color diagnose] (cond
+                           (< bmi 18.5) ["orange" "underweight"]
+                           (< bmi 25) ["inherit" "normal"]
+                           (< bmi 30) ["orange" "overweight"]
+                           :else ["red" "obese"])]
+    (reset! *bmi-data data)
+    [:div.bmi
+     [:div
+      "Height: " (int height) "cm"
+      (slider :height height 100 220)]
+     [:div
+      "Weight: " (int weight) "kg"
+      (slider :weight weight 30 150)]
+     [:div
+      "BMI: " (int bmi) " "
+      [:span {:style {:color color}} diagnose]
+      (slider :bmi bmi 10 50)]]))
+
+(defn- mount-bmi-calculator [el]
+  (rum/mount (bmi-calculator) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -184,8 +231,11 @@
     [:.example-title "Binary clock"]
     [:#binary-clock]]
    [:.example
-    [:.example-title]
-    [:#artboard]]])
+    [:.example-title "Artboard"]
+    [:#artboard]]
+   [:.example
+    [:.example-title "BMI Calculator"]
+    [:#bmi]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -200,6 +250,7 @@
 (mount-controls (dom-el "controls"))
 (mount-binary-clock (dom-el "binary-clock"))
 (mount-artboard (dom-el "artboard"))
+(mount-bmi-calculator (dom-el "bmi"))
 
 ;;** Start clock
 (tick)
