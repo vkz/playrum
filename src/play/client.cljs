@@ -436,6 +436,41 @@
 (defn- mount-self-reference [el]
   (rum/mount (self-reference [:a [:b :c [:f [:d :e] :k]]]) el))
 
+;;** context
+
+;; Components with context that all descendants have access to implicitly.
+
+;; This is useful when you are using child components you cannot modify. For
+;; example, a JS library that gives you components which rely on a context value
+;; being set by an ancestor component.
+
+;; Assume this subcomponent is from some js library and expects context passed
+;; from parent.
+(rum/defcc rum-context-comp < {:class-properties
+                               {:contextTypes
+                                {:color js/React.PropTypes.string}}}
+  [comp]
+  [:span
+   {:style {:color (.. comp -context -color)}}
+   "Child component uses context to set font color."])
+
+;; Assume the following component is from our source code.
+(def color-theme
+  {:child-context (fn [state] {:color @*color})
+   :class-properties {:childContextTypes {:color js/React.PropTypes.string}}})
+
+(rum/defc context < color-theme rum/reactive
+  []
+  ;; let's also make it less boring by reacting to color even though we never
+  ;; use its value explicitly
+  (let [color (rum/react *color)]
+    [:div
+     [:div "Root component implicitly passes data to descendants."]
+     (rum-context-comp)]))
+
+(defn- mount-context [el]
+  (rum/mount (context) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -472,7 +507,10 @@
     [:#keys]]
    [:.example
     [:.example-title "Self-reference"]
-    [:#self-reference]]])
+    [:#self-reference]]
+   [:.example
+    [:.example-title "Context"]
+    [:#context]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -494,6 +532,7 @@
 (mount-local-state (dom-el "local-state"))
 (mount-keys (dom-el "keys"))
 (mount-self-reference (dom-el "self-reference"))
+(mount-context (dom-el "context"))
 
 ;;** Start clock
 (tick)
