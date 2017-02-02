@@ -339,6 +339,35 @@
 (defn- mount-inputs [el]
   (rum/mount (inputs) el))
 
+;;** refs
+
+(rum/defcc ta < {:after-render
+                 (fn [state]
+                   (let [ta (rum/ref-node state "ta")]
+                     (set! (.-height (.-style ta)) "0")
+                     (set! (.-height (.-style ta))
+                           (str (+ 2 (.-scrollHeight ta)) "px")))
+                   ;; mixins must return state, else you get weird errors
+                   state)}
+  [comp]
+  [:textarea
+   {:ref :ta
+    :style {:width "100%"
+            :padding "10px"
+            :font "inherit"
+            :outline "none"
+            :resize "none"}
+    :default-value "Auto-resizing\ntextarea"
+    :placeholder "Auto-resizing textarea"
+    :on-change (fn [_] (rum/request-render comp))}])
+
+(rum/defc refs []
+  [:div
+   (ta)])
+
+(defn- mount-refs [el]
+  (rum/mount (refs) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -363,7 +392,10 @@
     [:#form-validation]]
    [:.example
     [:.example-title "Inputs"]
-    [:#inputs]]])
+    [:#inputs]]
+   [:.example
+    [:.example-title "Refs"]
+    [:#refs]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -381,6 +413,7 @@
 (mount-bmi-calculator (dom-el "bmi"))
 (mount-form-validation (dom-el "form-validation"))
 (mount-inputs (dom-el "inputs"))
+(mount-refs (dom-el "refs"))
 
 ;;** Start clock
 (tick)
