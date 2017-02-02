@@ -272,6 +272,73 @@
 (defn- mount-form-validation [el]
   (rum/mount (form-validation) el))
 
+;;** inputs
+
+(def values (range 1 5 1))
+
+(rum/defc input-text < rum/reactive [*ref]
+  [:input {:type "text"
+           :style {:width 170}
+           :value (rum/react *ref)
+           :on-change (fn [e]
+                        (reset! *ref (long (.. e -currentTarget -value))))}])
+
+(defn- next-value [v]
+  (let [vv (rand-nth values)]
+    (if (= v vv)
+      (recur v)
+      vv)))
+
+(rum/defc shuffle-button [*ref]
+  [:button
+   {:on-click #(swap! *ref next-value)}
+   "Next value"])
+
+(rum/defc input-value < rum/reactive [*ref]
+  [:code (pr-str (rum/react *ref))])
+
+(rum/defc input-checkbox < rum/reactive [*ref]
+  (let [value (rum/react *ref)]
+    [:dive
+     (for [v values]
+       [:input {:type "checkbox"
+                :name "inputs_checkbox"
+                :checked (= v value)
+                :value v
+                :key v
+                :on-click (fn [_] (reset! *ref v))}])]))
+
+(rum/defc input-radio < rum/reactive [*ref]
+  (let [value (rum/react *ref)]
+    [:div
+     (for [v values]
+       [:input {:type "radio"
+                :name "inputs_radio"
+                :checked (= v value)
+                :key v
+                :value v
+                :on-click (fn [_] (reset! *ref v))}])]))
+
+(rum/defc input-select < rum/reactive [*ref]
+  (let [value (rum/react *ref)]
+    [:select {:value value
+              :on-change (fn [e]
+                           (reset! *ref (long (.. e -currentTarget -value))))}
+     (for [v values]
+       [:option {:value v :key v} v])]))
+
+(rum/defc inputs []
+  (let [*ref (atom 1)]
+    [:dl
+     [:dt "Input"] [:dd (input-text *ref)]
+     [:dt "Checks"] [:dd (input-checkbox *ref)]
+     [:dt "Radio"] [:dd (input-radio *ref)]
+     [:dt "Select"] [:dd (input-select *ref)]
+     [:dt (input-value *ref)] [:dd (shuffle-button *ref)]]))
+
+(defn- mount-inputs [el]
+  (rum/mount (inputs) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -293,7 +360,10 @@
     [:#bmi]]
    [:.example
     [:.example-title "Form Validation"]
-    [:#form-validation]]])
+    [:#form-validation]]
+   [:.example
+    [:.example-title "Inputs"]
+    [:#inputs]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -310,6 +380,7 @@
 (mount-artboard (dom-el "artboard"))
 (mount-bmi-calculator (dom-el "bmi"))
 (mount-form-validation (dom-el "form-validation"))
+(mount-inputs (dom-el "inputs"))
 
 ;;** Start clock
 (tick)
