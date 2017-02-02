@@ -368,6 +368,38 @@
 (defn- mount-refs [el]
   (rum/mount (refs) el))
 
+;;** local-state
+
+(comment
+
+  ;; Alternative solution:
+  ;; Close over state and pass it over to the subcomponent. We pretty much
+  ;; fake "local state" this way without actually using React's local state.
+
+  (rum/defc clicker < rum/reactive [*ref title]
+    [:div {:style {"-webkit-user-select" "none"
+                   "cursor" "pointer"}
+           :on-click (fn [_] (swap! *ref inc))}
+     title ": " (rum/react *ref)])
+
+  (rum/defc local-state [title]
+    (let [*count (atom 0)]
+      [:div (clicker *count title)]))
+  ;; end
+  )
+
+(rum/defcs local-state < (rum/local 0 ::key)
+  [state title]
+  (let [*count (::key state)]
+    [:div
+     {:style {"-webkit-user-select" "none"
+              "cursor" "pointer"}
+      :on-click (fn [_] (swap! *count inc))}
+     title ": " @*count]))
+
+(defn- mount-local-state [el]
+  (rum/mount (local-state "Clicks count") el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -395,7 +427,10 @@
     [:#inputs]]
    [:.example
     [:.example-title "Refs"]
-    [:#refs]]])
+    [:#refs]]
+   [:.example
+    [:.example-title "Local state"]
+    [:#local-state]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -414,6 +449,7 @@
 (mount-form-validation (dom-el "form-validation"))
 (mount-inputs (dom-el "inputs"))
 (mount-refs (dom-el "refs"))
+(mount-local-state (dom-el "local-state"))
 
 ;;** Start clock
 (tick)
