@@ -1,4 +1,5 @@
 (ns play.client
+  (:refer-clojure :exclude [keys])
   (:require [rum.core :as rum]))
 
 (enable-console-print!)
@@ -400,6 +401,24 @@
 (defn- mount-local-state [el]
   (rum/mount (local-state "Clicks count") el))
 
+;;** keys
+
+(rum/defc keyed < {:key-fn (fn [label number]
+                             (str label "-" number))}
+  [label number]
+  [:div (str label "-" number)])
+
+(rum/defc keys []
+  [:div
+   (list
+    (keyed "a" 1)
+    (keyed "a" 2)
+    (keyed "b" 1)
+    (rum/with-key (keyed "a" 1) "x"))])
+
+(defn- mount-keys [el]
+  (rum/mount (keys) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -430,7 +449,10 @@
     [:#refs]]
    [:.example
     [:.example-title "Local state"]
-    [:#local-state]]])
+    [:#local-state]]
+   [:.example
+    [:.example-title "Keys"]
+    [:#keys]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -450,6 +472,7 @@
 (mount-inputs (dom-el "inputs"))
 (mount-refs (dom-el "refs"))
 (mount-local-state (dom-el "local-state"))
+(mount-keys (dom-el "keys"))
 
 ;;** Start clock
 (tick)
