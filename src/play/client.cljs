@@ -419,6 +419,23 @@
 (defn- mount-keys [el]
   (rum/mount (keys) el))
 
+;;** self-reference
+
+(rum/defc self-reference < rum/static
+  ([form] (self-reference form 0))
+  ([form depth]
+   (let [offset {:style {:margin-left (* 10 depth)}}]
+     (if (sequential? form)
+       [:.branch offset (map #(rum/with-key
+                                (self-reference %1 (inc depth)) %2)
+                             form
+                             ;; keys for children
+                             (range))]
+       [:.leaf offset (str form)]))))
+
+(defn- mount-self-reference [el]
+  (rum/mount (self-reference [:a [:b :c [:f [:d :e] :k]]]) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -452,7 +469,10 @@
     [:#local-state]]
    [:.example
     [:.example-title "Keys"]
-    [:#keys]]])
+    [:#keys]]
+   [:.example
+    [:.example-title "Self-reference"]
+    [:#self-reference]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -473,6 +493,7 @@
 (mount-refs (dom-el "refs"))
 (mount-local-state (dom-el "local-state"))
 (mount-keys (dom-el "keys"))
+(mount-self-reference (dom-el "self-reference"))
 
 ;;** Start clock
 (tick)
