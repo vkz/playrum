@@ -471,6 +471,36 @@
 (defn- mount-context [el]
   (rum/mount (context) el))
 
+
+;;** custom-props
+(defn rand-color []
+  (str "#" (-> (rand)
+               (* 0xffffff)
+               (js/Math.floor)
+               (.toString 16))))
+
+(def props
+  {:msgData "Components can store custom data on the underlying React component."
+   :msgMethod #(this-as this
+                 [:div {:style {:cursor "pointer"}
+                        :on-mouse-move
+                        (fn [_]
+                          (reset! *color (rand-color))
+                          (aset this "msgData"
+                                [:div {:style {:color @*color}}
+                                 (:msgData props)])
+                          (rum/request-render this))}
+                  "Custom methods too. Hover me!"])})
+
+(rum/defcc custom-props < {:class-properties props} [this]
+  [:div
+   ;; using aget to avoid writing externs
+   [:div (aget this "msgData")]
+   [:div ((aget this "msgMethod"))]])
+
+(defn- mount-custom-props [el]
+  (rum/mount (custom-props) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -510,7 +540,10 @@
     [:#self-reference]]
    [:.example
     [:.example-title "Context"]
-    [:#context]]])
+    [:#context]]
+   [:.example
+    [:.example-title "Custom props"]
+    [:#custom-props]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -533,6 +566,7 @@
 (mount-keys (dom-el "keys"))
 (mount-self-reference (dom-el "self-reference"))
 (mount-context (dom-el "context"))
+(mount-custom-props (dom-el "custom-props"))
 
 ;;** Start clock
 (tick)
