@@ -217,6 +217,61 @@
 (defn- mount-bmi-calculator [el]
   (rum/mount (bmi-calculator) el))
 
+;;** form-validation
+
+(rum/defc validated-input < rum/reactive [ref f]
+  [:input {:type "text"
+           :style {:width 170
+                   :background-color (when-not (f (rum/react ref))
+                                       (rum/react *color))}
+           :value (rum/react ref)
+           :on-change #(reset! ref (.. % -target -value))}])
+
+(rum/defcc restricted-input < rum/reactive [comp ref f]
+  [:input {:type "text"
+           :style {:width 170}
+           :value (rum/react ref)
+           :on-change #(let [new-val (.. % -target -value)]
+                         (if (f new-val)
+                           (reset! ref new-val)
+                           ;; request-render is mandatory because sablono :input
+                           ;; keeps current value in input’s state and always
+                           ;; applies changes to it
+                           (rum/request-render comp)))}])
+
+(rum/defcs restricted-input-native < rum/reactive [state ref f]
+  (let [comp (:rum/react-component state)]
+    (js/React.createElement
+     "input"
+     #js {:type "text"
+          :style #js {:width 170}
+          :value (rum/react ref)
+          :onChange #(let [new-val (.. % -target -value)]
+                       (when (f new-val)
+                         (reset! ref new-val)
+                         ;; need forceUpdate here because otherwise rendering
+                         ;; will be delayed until requestAnimationFrame and that
+                         ;; breaks cursor position inside input
+                         (.forceUpdate comp)))})))
+
+(rum/defc form-validation []
+  (let [state (atom {:email "joe@example.com"
+                     :phone "+7916 810 0356"
+                     :age "35"})]
+    [:dl
+     [:dt "Email: "] [:dd (validated-input
+                           (rum/cursor state :email)
+                           #(re-matches #"[^@]+@[^@.]+\..+" %))]
+     [:dt "Phone: "] [:dd (restricted-input-native
+                           (rum/cursor state :phone)
+                           #(re-matches #"[0-9\- +()]*" %))]
+     [:dt "Age: "] [:dd (restricted-input
+                         (rum/cursor state :age)
+                         #(re-matches #"([1-9][0-9]*)?" %))]]))
+
+(defn- mount-form-validation [el]
+  (rum/mount (form-validation) el))
+
 ;;** window
 (rum/defc window []
   [:div
@@ -235,7 +290,10 @@
     [:#artboard]]
    [:.example
     [:.example-title "BMI Calculator"]
-    [:#bmi]]])
+    [:#bmi]]
+   [:.example
+    [:.example-title "Form Validation"]
+    [:#form-validation]]])
 
 (defn mount [el]
   (rum/mount (window) el))
@@ -251,6 +309,7 @@
 (mount-binary-clock (dom-el "binary-clock"))
 (mount-artboard (dom-el "artboard"))
 (mount-bmi-calculator (dom-el "bmi"))
+(mount-form-validation (dom-el "form-validation"))
 
 ;;** Start clock
 (tick)
