@@ -1,4 +1,4 @@
-(defproject play "0.1.0-SNAPSHOT"
+(defproject playrum "0.1.0-SNAPSHOT"
   :description ""
   :url ""
   :license {:name "The MIT License"
@@ -13,12 +13,13 @@
                    :dependencies [[com.cemerick/piggieback "0.2.1"]
                                   [figwheel-sidecar "0.5.9"]]
                    :source-paths ["dev"]}}
+  :main "playrum.main"
   :aliases {"make" ["do" "clean" ["deps"] ["cljsbuild" "once" "advanced"] ["run"]]}
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src" "dev"]
                         :figwheel true
                         :compiler
-                        {:main "play.client"
+                        {:main "playrum.client"
                          :output-to "target/app.js"
                          :output-dir "target/dev"
                          :asset-path "target/dev"

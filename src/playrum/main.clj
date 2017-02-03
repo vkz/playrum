@@ -1,4 +1,4 @@
-(ns play.main
+(ns playrum.main
   (:require [hiccup.page :refer [doctype html5 include-js]]))
 
 (def css
@@ -37,4 +37,6 @@
          (include-js "target/app.js")))
 
 (defn -main [& args]
-  (spit "index.html" (page)))
+  (println "Writing index.html ...\n")
+  (spit "index.html" (page))
+  (println "Now point your browser to index.html"))

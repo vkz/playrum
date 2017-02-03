@@ -1,4 +1,4 @@
-(ns play.client
+(ns playrum.client
   (:refer-clojure :exclude [keys])
   (:require [rum.core :as rum]))
 
