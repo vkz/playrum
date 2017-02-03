@@ -13,6 +13,7 @@
                    :dependencies [[com.cemerick/piggieback "0.2.1"]
                                   [figwheel-sidecar "0.5.9"]]
                    :source-paths ["dev"]}}
+  :aliases {"make" ["do" "clean" ["deps"] ["cljsbuild" "once" "advanced"] ["run"]]}
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src" "dev"]
                         :figwheel true
