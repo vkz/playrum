@@ -150,22 +150,21 @@
     ;; note that subscription to color is conditional:
     ;; only if cell is on (@cursor == true),
     ;; this component will be notified on color changes
-    [:td.art-cell {:style {:background-color (when (rum/react *cursor) (rum/react *color))}
-                   :on-mouse-over (fn [_] (swap! *cursor not) nil)}]))
+    [:div.art-cell {:style {:background-color (when (rum/react *cursor) (rum/react *color))}
+                    :on-mouse-over (fn [_] (swap! *cursor not) nil)}]))
 
 (rum/defc board-reactive []
-  ;; faking board with a table till we add CSS for .artboard .art-cell .stats
-  [:div
-   [:table
-    [:tbody.artboard
-     (for [y (range 0 board-height)]
-       [:tr.art-row {:key y}
-        (for [x (range 0 board-width)]
-          ;; this is how one can specify React key for component. React requires
-          ;; creating "stable identities" for children in arrays and iterators -
-          ;; no idea why.
-          (-> (cell x y)
-              (rum/with-key [x y])))])]]
+  ;; there is nothing stopping from constructing the board as a table instead of
+  ;; custom divs
+  [:div.artboard
+   (for [y (range 0 board-height)]
+     [:div.art-row {:key y}
+      (for [x (range 0 board-width)]
+        ;; this is how one can specify React key for component. React requires
+        ;; creating "stable identities" for children in arrays and iterators -
+        ;; no idea why.
+        (-> (cell x y)
+            (rum/with-key [x y])))])
    (board-stats *board *board-renders)])
 
 (defn- mount-artboard [el]
@@ -434,7 +433,7 @@
        [:.leaf offset (str form)]))))
 
 (defn- mount-self-reference [el]
-  (rum/mount (self-reference [:a [:b :c [:f [:d :e] :k]]]) el))
+  (rum/mount (self-reference [:a [:b :c [:f [:d :e]]]]) el))
 
 ;;** context
 
@@ -501,7 +500,7 @@
 (defn- mount-custom-props [el]
   (rum/mount (custom-props) el))
 
-;;** window
+;;* Component container
 (rum/defc window []
   [:div
    [:.example
