@@ -1,0 +1,19 @@
+* playrum
+
+These are [[https://github.com/tonsky/rum/tree/gh-pages/examples/rum][rum examples]] moved to their own repo. There's absolutely nothing wrong with the original but I did want a simpler structure and most work done on the client. If, like me, you have zero experience with frontend but comfortable with Clojure, you might find present structure easier to follow.
+
+* Install and run
+
+#+BEGIN_SRC shell
+
+git clone git@github.com:vkz/playrum.git
+cd playrum
+lein make
+
+#+END_SRC
+
+Now point your favorite browser to *playrum/index.html*.
+
+* Thanks
+
+All praise and glory should be directed at [[https://github.com/tonsky][tonsky]] - rum's creator, author of these wonderful examples. One can only wish more people cared enough to supply their users with extensive examples and adequate documentation.
