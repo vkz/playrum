@@ -13,13 +13,13 @@
                    :dependencies [[com.cemerick/piggieback "0.2.1"]
                                   [figwheel-sidecar "0.5.9"]]
                    :source-paths ["dev"]}}
-  :main "playrum.main"
+  :main playrum.main
   :aliases {"make" ["do" "clean" ["deps"] ["cljsbuild" "once" "advanced"] ["run"]]}
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src" "dev"]
                         :figwheel true
                         :compiler
-                        {:main "playrum.client"
+                        {:main playrum.client
                          :output-to "target/app.js"
                          :output-dir "target/dev"
                          :asset-path "target/dev"
